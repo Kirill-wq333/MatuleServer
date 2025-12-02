@@ -1,0 +1,59 @@
+### Регистрация
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123",
+  "name": "Тестовый пользователь",
+  "phone": "+79991234567"
+}
+
+### Логин
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### Профиль (заменить TOKEN)
+GET http://localhost:3000/api/profile
+Authorization: Bearer YOUR_TOKEN
+
+### Все товары
+GET http://localhost:3000/api/products
+Authorization: Bearer YOUR_TOKEN
+
+### Товары по категории
+GET http://localhost:3000/api/products/category/men
+Authorization: Bearer YOUR_TOKEN
+
+### Лайк товара
+POST http://localhost:3000/api/products/1/like
+Authorization: Bearer YOUR_TOKEN
+
+### Добавить в корзину
+POST http://localhost:3000/api/cart
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "quantity": 1,
+  "size": 42,
+  "color": "black"
+}
+
+### Корзина
+GET http://localhost:3000/api/cart
+Authorization: Bearer YOUR_TOKEN
+
+### Добавить в избранное
+POST http://localhost:3000/api/favorites/1
+Authorization: Bearer YOUR_TOKEN
+
+### Избранное
+GET http://localhost:3000/api/favorites
+Authorization: Bearer YOUR_TOKEN

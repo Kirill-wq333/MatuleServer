@@ -1,0 +1,309 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "admin@example.com",
+      "password": "admin123",
+      "firstName": "Администратор",
+      "lastName": "",
+      "phone": "+79991234567",
+      "country": "Nigeria",
+      "city": "Lagos",
+      "address": "Main Street 123",
+      "postalCode": "100001",
+      "avatar": "https://example.com/avatars/admin.jpg",
+      "dateOfBirth": "1990-05-15",
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2025-11-27T07:38:48.564Z"
+    },
+    {
+      "id": 2,
+      "email": "user@example.com",
+      "password": "user123",
+      "firstName": "Епmanuel",
+      "lastName": "Oyiboke",
+      "phone": "+79991234568",
+      "country": "Nigeria",
+      "city": "Lagos",
+      "address": "Oak Avenue 45",
+      "postalCode": "100002",
+      "avatar": "https://example.com/avatars/user.jpg",
+      "dateOfBirth": "1995-08-20",
+      "createdAt": "2024-01-02T00:00:00.000Z",
+      "updatedAt": "2024-01-19T15:30:00.000Z"
+    },
+    {
+      "id": 1763972107116,
+      "email": "dfhhd@example.com",
+      "password": "password123",
+      "firstName": "dsfgdfhgd",
+      "lastName": "",
+      "phone": "",
+      "country": "Nigeria",
+      "city": "Lagos",
+      "address": "Oak Avenue 45",
+      "postalCode": "100002",
+      "avatar": "",
+      "dateOfBirth": "1990-05-15",
+      "createdAt": "2025-11-24T08:15:07.116Z"
+    },
+    {
+      "id": 1764185793620,
+      "email": "kirill@gmail.com",
+      "password": "54246732WE",
+      "firstName": "kirill",
+      "lastName": "Shar",
+      "phone": "79179704379",
+      "country": "",
+      "city": "",
+      "address": "",
+      "postalCode": "",
+      "avatar": "",
+      "dateOfBirth": "",
+      "createdAt": "2025-11-26T19:36:33.620Z"
+    }
+  ],
+  "tokens": [
+    {
+      "id": 1,
+      "userId": 1,
+      "token": "admin_permanent_token_12345",
+      "createdAt": "025-11-24T08:15:07.117Z",
+      "lastLogoutAt": "2025-11-24T08:20:20.891Z"
+    },
+    {
+      "id": 2,
+      "userId": 2,
+      "token": "user_permanent_token_67890",
+      "createdAt": "2024-01-02T00:00:00.000Z"
+    },
+    {
+      "id": 1763972107118,
+      "userId": 1763972107116,
+      "token": "user_token_1763972107117",
+      "createdAt": "2025-11-24T08:15:07.117Z",
+      "lastLogoutAt": "2025-11-24T08:15:29.572Z"
+    },
+    {
+      "id": 1764185793639,
+      "userId": 1764185793620,
+      "token": "user_token_1764185793638",
+      "createdAt": "2025-11-26T19:36:33.638Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "Woman",
+      "slug": "Woman"
+    },
+    {
+      "id": 2,
+      "name": "Men",
+      "slug": "men"
+    },
+    {
+      "id": 3,
+      "name": "Kids",
+      "slug": "kids"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "Nike Air Max 270 Essential",
+      "category": "Men",
+      "subcategory": "men",
+      "price": 179.39,
+      "description": "Вставка Max Air 270 Обеспечивает Непревзойденный Комфорт в Течение Всего Дня. Извечный дизайн. Кроссовки Nike Air Max 270 Essential сочетают в себе непревзойденный комфорт и стильный дизайн. Технология Max Air обеспечивает оптимальную амортизацию для повседневной носки.",
+      "images": [
+        "https://n.cdn.cdek.shopping/images/shopping/1275790f690c473091ba765678abded4.jpg?v=1",
+        "https://example.com/nike-air-max-270-2.jpg",
+        "https://example.com/nike-air-max-270-3.jpg"
+      ],
+      "isPopular": true,
+      "createdAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "name": "Nike Club Max",
+      "category": "Men",
+      "subcategory": "men",
+      "price": 152,
+      "description": "Универсальные кроссовки для активного образа жизни. Nike Club Max - идеальный выбор для повседневной носки и активного отдыха.",
+      "images": [
+        "https://avatars.mds.yandex.net/i?id=5b4a43154c0a1c6d5d4f19dbc8da4a499c7f21dd74c0306f-12421956-images-thumbs&n=13"
+      ],
+      "isPopular": true,
+      "createdAt": "2024-01-16T00:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "name": "Nike Air Max 200",
+      "category": "Men",
+      "subcategory": "men",
+      "price": 152,
+      "description": "Профессиональные кроссовки для тенниса. Специально разработанные для тенниса кроссовки с улучшенной поддержкой.",
+      "images": [
+        "https://avatars.mds.yandex.net/i?id=5ca22dfdb9131b2141f6b821f6825615_l-5245755-images-thumbs&n=13"
+      ],
+      "isPopular": false,
+      "createdAt": "2024-01-17T00:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "name": "Nike Air Force 1",
+      "category": "Woman",
+      "subcategory": "woman",
+      "price": 199.99,
+      "description": "Классические кроссовки на все времена. Легендарные Nike Air Force 1 - стиль, который никогда не выходит из моды.",
+      "images": [
+        "https://main-cdn.sbermegamarket.ru/big2/hlr-system/459/338/986/261/516/100074109439b0.jpg"
+      ],
+      "isPopular": true,
+      "createdAt": "2024-01-18T00:00:00.000Z"
+    }
+  ],
+  "promotions": [
+    {
+      "id": 1,
+      "title": "Скидка 15% на Nike Air Max",
+      "description": "Специальное предложение на все модели Nike Air Max",
+      "image": "https://static.insales-cdn.com/files/1/2826/5737226/original/АвтоматизацияОбувь11.jpg",
+      "discount": 15,
+      "validUntil": "2024-12-31T23:59:59.000Z",
+      "isActive": true,
+      "createdAt": "2024-01-20T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "title": "Бесплатная доставка",
+      "description": "Бесплатная доставка при заказе от 5000 рублей",
+      "image": "https://i.pinimg.com/originals/35/c6/64/35c664e5544204152dd2bae9d28c8ab8.jpg",
+      "discount": 0,
+      "validUntil": "2024-06-30T23:59:59.000Z",
+      "isActive": true,
+      "createdAt": "2024-01-19T00:00:00.000Z"
+    }
+  ],
+  "cart": [
+    {
+      "id": 1764237765649,
+      "userId": 1764185793620,
+      "productId": 1,
+      "quantity": 1,
+      "createdAt": "2025-11-27T10:02:45.649Z"
+    },
+    {
+      "id": 1764249095117,
+      "userId": 1,
+      "productId": 1,
+      "quantity": 1,
+      "createdAt": "2025-11-27T13:11:35.117Z"
+    }
+  ],
+  "favorites": [
+    {
+      "id": 1764085842301,
+      "userId": 1,
+      "productId": 2,
+      "createdAt": "2025-11-25T15:50:42.301Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": 1,
+      "orderNumber": 1001,
+      "userId": 1,
+      "items": [
+        {
+          "productId": 1,
+          "name": "Nike Air Max 270 Essential",
+          "price": 179.39,
+          "quantity": 1,
+          "image": "https://example.com/nike-air-max-270-1.jpg"
+        }
+      ],
+      "subtotal": 179.39,
+      "delivery": 60.2,
+      "total": 239.59,
+      "status": "delivered",
+      "contactInfo": {
+        "firstName": "Епmanuel",
+        "lastName": "Oyiboke",
+        "phone": "+79991234568",
+        "email": "user@example.com"
+      },
+      "address": {
+        "country": "Nigeria",
+        "city": "Lagos",
+        "street": "Main Street 123",
+        "postalCode": "100001"
+      },
+      "paymentMethod": "card",
+      "createdAt": "2024-01-19T15:42:00.000Z",
+      "updatedAt": "2024-01-21T10:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "orderNumber": 1002,
+      "userId": 1,
+      "items": [
+        {
+          "productId": 1,
+          "name": "Nike Air Max 270 Essential",
+          "price": 179.39,
+          "quantity": 1,
+          "image": "https://example.com/nike-air-max-270-1.jpg"
+        }
+      ],
+      "subtotal": 179.39,
+      "delivery": 60.2,
+      "total": 239.59,
+      "status": "delivered",
+      "contactInfo": {
+        "firstName": "Епmanuel",
+        "lastName": "Oyiboke",
+        "phone": "+79991234568",
+        "email": "user@example.com"
+      },
+      "address": {
+        "country": "Nigeria",
+        "city": "Lagos",
+        "street": "Main Street 123",
+        "postalCode": "100001"
+      },
+      "paymentMethod": "card",
+      "createdAt": "2024-01-19T15:42:00.000Z",
+      "updatedAt": "2024-01-21T10:00:00.000Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": 1,
+      "userId": 1,
+      "title": "Заказ доставлен",
+      "message": "Ваш заказ #1001 был успешно доставлен. Спасибо за покупку!",
+      "type": "order",
+      "isRead": false,
+      "createdAt": "2024-01-21T10:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "title": "Заказ доставлен",
+      "message": "Ваш заказ #1002 был успешно доставлен. Спасибо за покупку!",
+      "type": "order",
+      "isRead": false,
+      "createdAt": "2024-01-21T10:00:00.000Z"
+    }
+  ],
+  "likes": [
+    {
+      "id": 1,
+      "userId": 1,
+      "productId": 1,
+      "createdAt": "2024-01-20T12:00:00.000Z"
+    }
+  ]
+}

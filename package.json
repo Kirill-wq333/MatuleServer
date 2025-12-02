@@ -1,0 +1,20 @@
+{
+  "name": "matule-server",
+  "version": "1.0.0",
+  "description": "Api для мазазина обуви",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js --watch . --ext js,json",
+    "watch": "nodemon server.js --watch . --ext js,json"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "json-server": "^0.17.4",
+    "jsonwebtoken": "^9.0.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
