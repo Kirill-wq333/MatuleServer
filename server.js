@@ -121,10 +121,10 @@ server.get('/api/promotions', (req, res) => {
   res.json(promotions);
 });
 
-const PORT = 3000;
+const PORT = 3005;
 const HOST = '0.0.0.0';
 
-server.listen(PORT, HOST, () => {
+server.listen(PORT, () => {
   console.log(`👟 Sneaker Shop API запущен на http://localhost:${PORT}`);
   console.log('📚 Документация API:');
   console.log('🔐 Аутентификация:');
