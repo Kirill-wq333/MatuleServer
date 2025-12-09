@@ -122,7 +122,6 @@ server.get('/api/promotions', (req, res) => {
 });
 
 const PORT = 3005;
-const HOST = '0.0.0.0';
 
 server.listen(PORT, () => {
   console.log(`👟 Sneaker Shop API запущен на http://localhost:${PORT}`);

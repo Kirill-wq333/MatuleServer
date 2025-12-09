@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
   }
   
   // Фильтрация по категории
-  if (category && (category === 'outdoor' || category === 'tennis')) {
+  if (category && (category === 'men' || category === 'woman' || category === 'kids')) {
     products = products.filter(product => product.category === category);
   }
   
