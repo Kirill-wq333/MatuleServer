@@ -83,7 +83,7 @@ router.get('/category/:category', (req, res) => {
   const userId = req.user.id;
   
   // Проверяем что категория допустимая
-  if (category !== 'outdoor' && category !== 'tennis') {
+  if (category !== 'men' && category !== 'woman' && category !== 'kids') {
     return res.status(400).json({ error: 'Неверная категория' });
   }
   
