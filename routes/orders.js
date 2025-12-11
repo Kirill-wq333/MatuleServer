@@ -192,4 +192,29 @@ router.put('/:id/status', (req, res) => {
   });
 });
 
+router.delete('/:id', (req, res) => {
+  const db = req.app.db || require('json-server').router('db.json').db;
+  const orderId = parseInt(req.params.id);
+
+  // Проверяем, существует ли заказ перед удалением
+  const order = db.get('orders').find({ id: orderId }).value();
+
+  if (!order) {
+    return res.status(404).json({
+      success: false,
+      error: 'Заказ не найден'
+    });
+  }
+
+  // Удаляем заказ
+  db.get('orders')
+    .remove({ id: orderId }) 
+    .write(); 
+
+  res.json({
+    success: true,
+    message: 'Заказ успешно удален'
+  });
+});
+
 module.exports = router;
