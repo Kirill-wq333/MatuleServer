@@ -112,8 +112,8 @@
     {
       "id": 1,
       "name": "Nike Air Max 270 Essential",
-      "category": "Men",
-      "subcategory": "men",
+      "category": "men",
+      "subcategory": "Men",
       "price": 179.39,
       "description": "Вставка Max Air 270 Обеспечивает Непревзойденный Комфорт в Течение Всего Дня. Извечный дизайн. Кроссовки Nike Air Max 270 Essential сочетают в себе непревзойденный комфорт и стильный дизайн. Технология Max Air обеспечивает оптимальную амортизацию для повседневной носки.",
       "images": [
@@ -127,8 +127,8 @@
     {
       "id": 2,
       "name": "Nike Club Max",
-      "category": "Men",
-      "subcategory": "men",
+      "category": "men",
+      "subcategory": "Men",
       "price": 152,
       "description": "Универсальные кроссовки для активного образа жизни. Nike Club Max - идеальный выбор для повседневной носки и активного отдыха.",
       "images": [
@@ -140,8 +140,8 @@
     {
       "id": 3,
       "name": "Nike Air Max 200",
-      "category": "Men",
-      "subcategory": "men",
+      "category": "men",
+      "subcategory": "Men",
       "price": 152,
       "description": "Профессиональные кроссовки для тенниса. Специально разработанные для тенниса кроссовки с улучшенной поддержкой.",
       "images": [
@@ -153,8 +153,8 @@
     {
       "id": 4,
       "name": "Nike Air Force 1",
-      "category": "Woman",
-      "subcategory": "woman",
+      "category": "woman",
+      "subcategory": "Woman",
       "price": 199.99,
       "description": "Классические кроссовки на все времена. Легендарные Nike Air Force 1 - стиль, который никогда не выходит из моды.",
       "images": [
@@ -162,6 +162,126 @@
       ],
       "isPopular": true,
       "createdAt": "2024-01-18T00:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "name": "Nike Air Max 270 Essential",
+      "category": "kids",
+      "subcategory": "Kids",
+      "price": 191.39,
+      "description": "Вставка Max Air 270 Обеспечивает Непревзойденный Комфорт в Течение Всего Дня. Извечный дизайн. Кроссовки Nike Air Max 270 Essential сочетают в себе непревзойденный комфорт и стильный дизайн. Технология Max Air обеспечивает оптимальную амортизацию для повседневной носки.",
+      "images": [
+        "https://n.cdn.cdek.shopping/images/shopping/1275790f690c473091ba765678abded4.jpg?v=1",
+        "https://example.com/nike-air-max-270-2.jpg",
+        "https://example.com/nike-air-max-270-3.jpg"
+      ],
+      "isPopular": true,
+      "createdAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": 6,
+      "name": "Nike Air Max 270 Essential",
+      "category": "kids",
+      "subcategory": "Kids",
+      "price": 170.39,
+      "description": "Вставка Max Air 270 Обеспечивает Непревзойденный Комфорт в Течение Всего Дня. Извечный дизайн. Кроссовки Nike Air Max 270 Essential сочетают в себе непревзойденный комфорт и стильный дизайн. Технология Max Air обеспечивает оптимальную амортизацию для повседневной носки.",
+      "images": [
+        "https://n.cdn.cdek.shopping/images/shopping/1275790f690c473091ba765678abded4.jpg?v=1",
+        "https://example.com/nike-air-max-270-2.jpg",
+        "https://example.com/nike-air-max-270-3.jpg"
+      ],
+      "isPopular": true,
+      "createdAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": 7,
+      "name": "Nike Air Max 270 Essential",
+      "category": "woman",
+      "subcategory": "Woman",
+      "price": 99.39,
+      "description": "Вставка Max Air 270 Обеспечивает Непревзойденный Комфорт в Течение Всего Дня. Извечный дизайн. Кроссовки Nike Air Max 270 Essential сочетают в себе непревзойденный комфорт и стильный дизайн. Технология Max Air обеспечивает оптимальную амортизацию для повседневной носки.",
+      "images": [
+        "https://n.cdn.cdek.shopping/images/shopping/1275790f690c473091ba765678abded4.jpg?v=1",
+        "https://example.com/nike-air-max-270-2.jpg",
+        "https://example.com/nike-air-max-270-3.jpg"
+      ],
+      "isPopular": true,
+      "createdAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": 8,
+      "name": "Nike Air Max 270 Essential",
+      "category": "kids",
+      "subcategory": "Kids",
+      "price": 129.39,
+      "description": "Вставка Max Air 270 Обеспечивает Непревзойденный Комфорт в Течение Всего Дня. Извечный дизайн. Кроссовки Nike Air Max 270 Essential сочетают в себе непревзойденный комфорт и стильный дизайн. Технология Max Air обеспечивает оптимальную амортизацию для повседневной носки.",
+      "images": [
+        "https://n.cdn.cdek.shopping/images/shopping/1275790f690c473091ba765678abded4.jpg?v=1",
+        "https://example.com/nike-air-max-270-2.jpg",
+        "https://example.com/nike-air-max-270-3.jpg"
+      ],
+      "isPopular": true,
+      "createdAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": 9,
+      "name": "Nike Air Max 270 Essential",
+      "category": "men",
+      "subcategory": "Men",
+      "price": 199.99,
+      "description": "Вставка Max Air 270 Обеспечивает Непревзойденный Комфорт в Течение Всего Дня. Извечный дизайн. Кроссовки Nike Air Max 270 Essential сочетают в себе непревзойденный комфорт и стильный дизайн. Технология Max Air обеспечивает оптимальную амортизацию для повседневной носки.",
+      "images": [
+        "https://n.cdn.cdek.shopping/images/shopping/1275790f690c473091ba765678abded4.jpg?v=1",
+        "https://example.com/nike-air-max-270-2.jpg",
+        "https://example.com/nike-air-max-270-3.jpg"
+      ],
+      "isPopular": true,
+      "createdAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": 10,
+      "name": "Nike Air Max 270 Essential",
+      "category": "men",
+      "subcategory": "Men",
+      "price": 162.99,
+      "description": "Вставка Max Air 270 Обеспечивает Непревзойденный Комфорт в Течение Всего Дня. Извечный дизайн. Кроссовки Nike Air Max 270 Essential сочетают в себе непревзойденный комфорт и стильный дизайн. Технология Max Air обеспечивает оптимальную амортизацию для повседневной носки.",
+      "images": [
+        "https://n.cdn.cdek.shopping/images/shopping/1275790f690c473091ba765678abded4.jpg?v=1",
+        "https://example.com/nike-air-max-270-2.jpg",
+        "https://example.com/nike-air-max-270-3.jpg"
+      ],
+      "isPopular": true,
+      "createdAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": 11,
+      "name": "Nike Air Max 270 Essential",
+      "category": "woman",
+      "subcategory": "Woman",
+      "price": 379.39,
+      "description": "Вставка Max Air 270 Обеспечивает Непревзойденный Комфорт в Течение Всего Дня. Извечный дизайн. Кроссовки Nike Air Max 270 Essential сочетают в себе непревзойденный комфорт и стильный дизайн. Технология Max Air обеспечивает оптимальную амортизацию для повседневной носки.",
+      "images": [
+        "https://n.cdn.cdek.shopping/images/shopping/1275790f690c473091ba765678abded4.jpg?v=1",
+        "https://example.com/nike-air-max-270-2.jpg",
+        "https://example.com/nike-air-max-270-3.jpg"
+      ],
+      "isPopular": true,
+      "createdAt": "2024-01-15T00:00:00.000Z"
+    },
+    {
+      "id": 12,
+      "name": "Nike Air Max 270 Essential",
+      "category": "men",
+      "subcategory": "Men",
+      "price": 209.39,
+      "description": "Вставка Max Air 270 Обеспечивает Непревзойденный Комфорт в Течение Всего Дня. Извечный дизайн. Кроссовки Nike Air Max 270 Essential сочетают в себе непревзойденный комфорт и стильный дизайн. Технология Max Air обеспечивает оптимальную амортизацию для повседневной носки.",
+      "images": [
+        "https://n.cdn.cdek.shopping/images/shopping/1275790f690c473091ba765678abded4.jpg?v=1",
+        "https://example.com/nike-air-max-270-2.jpg",
+        "https://example.com/nike-air-max-270-3.jpg"
+      ],
+      "isPopular": true,
+      "createdAt": "2024-01-15T00:00:00.000Z"
     }
   ],
   "promotions": [
