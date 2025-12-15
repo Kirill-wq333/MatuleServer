@@ -36,9 +36,9 @@ server.get('/api/profile', (req, res) => {
   const db = router.db;
   
   const userData = db.get('users').find({ id: user.id }).value();
-  const { password, ...userWithoutPassword } = userData;
+  delete userData.password;
   
-  res.json(userWithoutPassword);
+  res.json(userData);
 });
 
 // Обновление профиля
