@@ -1,4 +1,6 @@
 const jsonServer = require('json-server');
+const express = require('express');
+
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
@@ -16,6 +18,11 @@ const middlewares = jsonServer.defaults();
 server.use(jsonServer.bodyParser);
 server.use(middlewares);
 server.use(corsMiddleware);
+
+server.use((req, res, next) => {
+  req.app.db = db;
+  next();
+});
 
 // Публичные маршруты
 server.use('/api/auth', authRoutes);
