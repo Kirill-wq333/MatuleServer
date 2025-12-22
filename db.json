@@ -12,7 +12,6 @@
       "address": "Main Street 123",
       "postalCode": "100001",
       "avatar": "https://example.com/avatars/admin.jpg",
-      "dateOfBirth": "1990-05-15",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2025-11-27T07:38:48.564Z"
     },
@@ -28,7 +27,6 @@
       "address": "Oak Avenue 45",
       "postalCode": "100002",
       "avatar": "https://example.com/avatars/user.jpg",
-      "dateOfBirth": "1995-08-20",
       "createdAt": "2024-01-02T00:00:00.000Z",
       "updatedAt": "2024-01-19T15:30:00.000Z"
     },
@@ -44,7 +42,6 @@
       "address": "Oak Avenue 45",
       "postalCode": "100002",
       "avatar": "",
-      "dateOfBirth": "1990-05-15",
       "createdAt": "2025-11-24T08:15:07.116Z"
     },
     {
@@ -59,7 +56,6 @@
       "address": "",
       "postalCode": "",
       "avatar": "",
-      "dateOfBirth": "",
       "createdAt": "2025-11-26T19:36:33.620Z"
     }
   ],

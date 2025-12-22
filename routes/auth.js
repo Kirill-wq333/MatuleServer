@@ -5,7 +5,7 @@ const router = express.Router();
 
 // Регистрация
 router.post('/register', (req, res) => {
-  const { email, password, firstName, lastName, phone } = req.body;
+  const { email, password, firstName } = req.body;
   
   if (!email || !password || !firstName) {
     return res.status(400).json({ 
@@ -30,14 +30,13 @@ router.post('/register', (req, res) => {
       email,
       password: password, // Простой пароль без хеширования
       firstName,
-      lastName: lastName || '',
-      phone: phone || '',
+      lastName: '',
+      phone: '',
       country: '',
       city: '',
       address: '',
       postalCode: '',
       avatar: '',
-      dateOfBirth: '',
       createdAt: new Date().toISOString()
     };
     

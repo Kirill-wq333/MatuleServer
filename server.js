@@ -1,6 +1,4 @@
 const jsonServer = require('json-server');
-const express = require('express');
-
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
@@ -51,7 +49,8 @@ server.get('/api/profile', (req, res) => {
 // Обновление профиля
 server.put('/api/profile', (req, res) => {
   const user = req.user;
-  const { 
+  const {
+    avatar, 
     firstName, 
     lastName, 
     phone, 
@@ -59,7 +58,6 @@ server.put('/api/profile', (req, res) => {
     city, 
     address, 
     postalCode, 
-    dateOfBirth, 
     gender 
   } = req.body;
   
@@ -76,6 +74,7 @@ server.put('/api/profile', (req, res) => {
   
   // Обновляем только переданные поля
   const updates = {};
+  if (avatar !== undefined) updates.avatar = avatar;
   if (firstName !== undefined) updates.firstName = firstName;
   if (lastName !== undefined) updates.lastName = lastName;
   if (phone !== undefined) updates.phone = phone;
@@ -83,7 +82,6 @@ server.put('/api/profile', (req, res) => {
   if (city !== undefined) updates.city = city;
   if (address !== undefined) updates.address = address;
   if (postalCode !== undefined) updates.postalCode = postalCode;
-  if (dateOfBirth !== undefined) updates.dateOfBirth = dateOfBirth;
   if (gender !== undefined) updates.gender = gender;
   
   updates.updatedAt = new Date().toISOString();
