@@ -1,4 +1,5 @@
 const jsonServer = require('json-server');
+const express = require('express');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
@@ -13,6 +14,8 @@ const router = jsonServer.router('db.json');
 const middlewares = jsonServer.defaults();
 
 // Middleware
+server.use(express.json);
+server.use(express.undefined({extended: true}));
 server.use(jsonServer.bodyParser);
 server.use(middlewares);
 server.use(corsMiddleware);

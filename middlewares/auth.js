@@ -1,3 +1,5 @@
+const jsonServer = require('json-server');
+
 module.exports = (req, res, next) => {
   const publicRoutes = [
     '/api/auth/login', 
@@ -26,15 +28,28 @@ module.exports = (req, res, next) => {
     return res.status(401).json({ error: 'Токен отсутствует' });
   }
   
-  const db = req.app.db || require('json-server').router('db.json').db;
-  
   try {
+    // ИСПРАВЛЕНО: Получаем db из app или создаем новый router
+    let db;
+    if (req.app && req.app.db) {
+      db = req.app.db;
+    } else {
+      // Создаем новый router для доступа к базе данных
+      const router = jsonServer.router('db.json');
+      db = router.db;
+      
+      if (!db.get('tokens').value()) {
+        db.set('tokens', []).write();
+      }
+      if (!db.get('users').value()) {
+        db.set('users', []).write();
+      }
+    }
+    
     // Ищем токен в таблице tokens
     const tokenData = db.get('tokens').find({ token }).value();
     
     if (!tokenData) {
-      // Для logout разрешаем продолжить даже если токен не найден
-      // (пользователь мог уже выйти, но пытается выйти еще раз)
       if (req.path === '/api/auth/logout') {
         return res.status(200).json({ 
           success: true, 
@@ -59,8 +74,14 @@ module.exports = (req, res, next) => {
       lastName: user.lastName
     };
     
+    req.db = db;
+    
     next();
   } catch (error) {
-    return res.status(401).json({ error: 'Ошибка проверки токена' });
+    console.error('Auth middleware error:', error);
+    return res.status(500).json({ 
+      error: 'Ошибка проверки токена',
+      details: error.message 
+    });
   }
 };
