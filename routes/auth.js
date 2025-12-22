@@ -27,13 +27,13 @@ router.post('/register', async (req, res) => {
     }
     
     // Хэшируем пароль
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // const hashedPassword = await bcrypt.hash(password, 10);
     
     // Создаем пользователя
     const newUser = {
       id: uuidv4(),
       email,
-      password: hashedPassword,
+      password: password,
       firstName,
       lastName: '',
       avatar: null,
