@@ -1,5 +1,5 @@
 module.exports = (req, res, next) => {
-  console.log(`Auth middleware - Path: ${req.path}, Method: ${req.method}`);
+  console.log(`🔐 Auth middleware - ${req.method} ${req.path}`);
   
   const publicRoutes = [
     '/api/auth/login',
@@ -7,9 +7,9 @@ module.exports = (req, res, next) => {
     '/api/auth/forgot-password'
   ];
   
-  // Пропускаем публичные маршруты
+  // Пропускаем публичные маршруты (только аутентификация)
   if (publicRoutes.includes(req.path)) {
-    console.log('✅ Public route, skipping auth');
+    console.log('✅ Public auth route, skipping auth');
     return next();
   }
   
@@ -19,18 +19,20 @@ module.exports = (req, res, next) => {
     return next();
   }
   
+  // Проверяем токен для ВСЕХ остальных маршрутов
   const authHeader = req.headers['authorization'];
-  console.log('Auth header:', authHeader ? 'Present' : 'Missing');
   
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.log('❌ No or invalid auth header');
+  if (!authHeader) {
+    console.log('❌ No authorization header');
     return res.status(401).json({
       success: false,
-      error: 'Токен отсутствует или имеет неверный формат'
+      error: 'Токен отсутствует'
     });
   }
   
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.startsWith('Bearer ') 
+    ? authHeader.split(' ')[1] 
+    : authHeader;
   
   if (!token) {
     console.log('❌ Token is empty');
@@ -40,19 +42,19 @@ module.exports = (req, res, next) => {
     });
   }
   
+  console.log(`🔍 Validating token: ${token.substring(0, 10)}...`);
+  
   try {
     // Получаем базу данных
     const db = req.getDatabase();
     
-    if (!db || !db.tokens) {
-      console.log('❌ Database or tokens not available');
+    if (!db || !db.tokens || !db.users) {
+      console.log('❌ Database structure is invalid');
       return res.status(500).json({
         success: false,
         error: 'Ошибка доступа к базе данных'
       });
     }
-    
-    console.log(`🔍 Looking for token in ${db.tokens.length} tokens`);
     
     // Ищем токен
     const tokenData = db.tokens.find(t => t.token === token);
@@ -78,7 +80,7 @@ module.exports = (req, res, next) => {
       });
     }
     
-    console.log(`✅ User found: ${user.email}`);
+    console.log(`✅ User authenticated: ${user.email} (${user.firstName})`);
     
     // Добавляем пользователя в запрос
     req.user = {
@@ -89,6 +91,7 @@ module.exports = (req, res, next) => {
     };
     
     next();
+    
   } catch (error) {
     console.error('🔥 Auth middleware error:', error);
     return res.status(500).json({
