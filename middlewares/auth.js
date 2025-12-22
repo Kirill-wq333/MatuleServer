@@ -1,10 +1,15 @@
+const jsonServer = require('json-server');
+
 module.exports = (req, res, next) => {
-  console.log(`Auth middleware - Path: ${req.path}, Method: ${req.method}`);
+  console.log(`🔐 Auth middleware: ${req.method} ${req.path}`);
   
+  // Публичные маршруты (без аутентификации)
   const publicRoutes = [
     '/api/auth/login',
     '/api/auth/register',
-    '/api/auth/forgot-password'
+    '/api/auth/forgot-password',
+    '/api/categories',
+    '/api/promotions'
   ];
   
   // Пропускаем публичные маршруты
@@ -19,18 +24,23 @@ module.exports = (req, res, next) => {
     return next();
   }
   
+  // Проверяем заголовок авторизации
   const authHeader = req.headers['authorization'];
-  console.log('Auth header:', authHeader ? 'Present' : 'Missing');
   
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.log('❌ No or invalid auth header');
+  if (!authHeader) {
+    console.log('❌ No authorization header');
     return res.status(401).json({
       success: false,
-      error: 'Токен отсутствует или имеет неверный формат'
+      error: 'Требуется авторизация'
     });
   }
   
-  const token = authHeader.split(' ')[1];
+  // Извлекаем токен из заголовка
+  const token = authHeader.startsWith('Bearer ') 
+    ? authHeader.substring(7) 
+    : authHeader;
+  
+  console.log('Token received:', token.substring(0, 10) + '...');
   
   if (!token) {
     console.log('❌ Token is empty');
@@ -41,21 +51,19 @@ module.exports = (req, res, next) => {
   }
   
   try {
-    // Получаем базу данных
-    const db = req.getDatabase();
+    // Получаем базу данных из запроса
+    const db = req.db;
     
-    if (!db || !db.tokens) {
-      console.log('❌ Database or tokens not available');
+    if (!db) {
+      console.log('❌ Database not available in request');
       return res.status(500).json({
         success: false,
         error: 'Ошибка доступа к базе данных'
       });
     }
     
-    console.log(`🔍 Looking for token in ${db.tokens.length} tokens`);
-    
-    // Ищем токен
-    const tokenData = db.tokens.find(t => t.token === token);
+    // Ищем токен в базе данных
+    const tokenData = db.get('tokens').find({ token }).value();
     
     if (!tokenData) {
       console.log('❌ Token not found in database');
@@ -65,27 +73,29 @@ module.exports = (req, res, next) => {
       });
     }
     
-    console.log(`✅ Token found for userId: ${tokenData.userId}`);
+    console.log('✅ Token found, userId:', tokenData.userId);
     
-    // Ищем пользователя
-    const user = db.users.find(u => u.id === tokenData.userId);
+    // Ищем пользователя по ID из токена
+    const user = db.get('users').find({ id: tokenData.userId }).value();
     
     if (!user) {
-      console.log('❌ User not found for token');
+      console.log('❌ User not found');
       return res.status(401).json({
         success: false,
         error: 'Пользователь не найден'
       });
     }
     
-    console.log(`✅ User found: ${user.email}`);
+    console.log('✅ User authenticated:', user.email);
     
-    // Добавляем пользователя в запрос
+    // Добавляем пользователя в объект запроса
     req.user = {
       id: user.id,
       email: user.email,
       firstName: user.firstName,
-      lastName: user.lastName
+      lastName: user.lastName,
+      avatar: user.avatar,
+      phone: user.phone
     };
     
     next();

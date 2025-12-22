@@ -13,7 +13,7 @@ const server = jsonServer.create();
 const router = jsonServer.router('db.json');
 const middlewares = jsonServer.defaults();
 
-// ИСПРАВЛЕНО: Получаем db из router
+// Получаем db из router
 const db = router.db;
 
 // Инициализируем коллекции если их нет
@@ -24,46 +24,89 @@ if (!db.get('users').value()) {
   db.set('users', []).write();
 }
 
-// Middleware - ИСПРАВЛЕНО:
-server.use(express.json()); // ✅ Добавьте скобки
-server.use(express.urlencoded({ extended: true })); // ✅ Исправлено название
+// Middleware
+server.use(express.json());
+server.use(express.urlencoded({ extended: true }));
 server.use(jsonServer.bodyParser);
 server.use(middlewares);
 server.use(corsMiddleware);
 
-// ИСПРАВЛЕНО: Передаем db в app
+// Передаем db в каждый запрос (единый подход)
 server.use((req, res, next) => {
-  req.app = req.app || {};
-  req.app.db = db; // ✅ db теперь определена
-  console.log('Setting db to request');
+  req.db = db; // Просто req.db, а не req.app.db
   next();
 });
 
-// Добавим логирование для отладки
+// Логирование для отладки
 server.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body || 'No body');
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  
+  // Логируем заголовки
+  if (req.headers.authorization) {
+    console.log('Auth token: Present');
+  } else {
+    console.log('Auth token: Missing');
+  }
+  
+  // Логируем body для POST/PUT/PATCH
+  if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+    console.log('Request body:', req.body || 'Empty');
+  }
+  
   next();
 });
 
-// Публичные маршруты
+// Публичные маршруты (без аутентификации)
 server.use('/api/auth', authRoutes);
 
-// Применяем аутентификацию
+// Публичный доступ к категориям и акциям
+server.get('/api/categories', (req, res) => {
+  try {
+    const categories = db.get('categories').value() || [];
+    res.json(categories);
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: 'Ошибка получения категорий' 
+    });
+  }
+});
+
+server.get('/api/promotions', (req, res) => {
+  try {
+    const promotions = (db.get('promotions').value() || [])
+      .filter(p => p.isActive === true)
+      .map(p => ({
+        id: p.id,
+        image: p.image,
+        validUntil: p.validUntil,
+        isActive: p.isActive,
+        createdAt: p.createdAt
+      }));
+    
+    res.json(promotions);
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: 'Ошибка получения акций' 
+    });
+  }
+});
+
+// Применяем аутентификацию ко всем остальным маршрутам
 server.use(authMiddleware);
 
-// Защищенные маршруты
+// Защищенные маршруты (требуют аутентификацию)
 server.use('/api/products', productRoutes);
 server.use('/api/cart', cartRoutes);
 server.use('/api/orders', orderRoutes);
 server.use('/api/favorites', favoriteRoutes);
 server.use('/api/notifications', notificationRoutes);
 
-// Профиль пользователя - ИСПРАВЛЕНО:
+// Профиль пользователя (защищенный)
 server.get('/api/profile', (req, res) => {
   try {
-    console.log('GET /api/profile - User:', req.user);
+    console.log('GET /api/profile - User ID:', req.user?.id);
     
     if (!req.user) {
       return res.status(401).json({ 
@@ -72,12 +115,9 @@ server.get('/api/profile', (req, res) => {
       });
     }
     
-    const user = req.user;
-    const db = req.app.db || router.db; // Безопасное получение db
+    const userId = req.user.id;
     
-    console.log('Looking for user with id:', user.id);
-    
-    const userData = db.get('users').find({ id: user.id }).value();
+    const userData = db.get('users').find({ id: userId }).value();
     
     if (!userData) {
       return res.status(404).json({ 
@@ -86,9 +126,7 @@ server.get('/api/profile', (req, res) => {
       });
     }
     
-    console.log('Found user:', userData.email);
-    
-    // Удаляем пароль
+    // Удаляем пароль из ответа
     const { password, ...userWithoutPassword } = userData;
     
     res.json(userWithoutPassword);
@@ -102,10 +140,10 @@ server.get('/api/profile', (req, res) => {
   }
 });
 
-// Обновление профиля - ИСПРАВЛЕНО:
+// Обновление профиля
 server.put('/api/profile', (req, res) => {
   try {
-    console.log('PUT /api/profile - User:', req.user);
+    console.log('PUT /api/profile - User:', req.user?.id);
     console.log('PUT /api/profile - Body:', req.body);
     
     if (!req.user) {
@@ -115,22 +153,10 @@ server.put('/api/profile', (req, res) => {
       });
     }
     
-    const user = req.user;
-    const {
-      avatar, 
-      firstName, 
-      lastName, 
-      phone, 
-      country, 
-      city, 
-      address, 
-      postalCode, 
-      gender 
-    } = req.body || {}; // ✅ Защита от undefined
+    const userId = req.user.id;
+    const updates = req.body || {};
     
-    const db = req.app.db || router.db;
-    
-    const userData = db.get('users').find({ id: user.id }).value();
+    const userData = db.get('users').find({ id: userId }).value();
     
     if (!userData) {
       return res.status(404).json({ 
@@ -140,26 +166,27 @@ server.put('/api/profile', (req, res) => {
     }
     
     // Обновляем только переданные поля
-    const updates = {};
-    if (avatar !== undefined) updates.avatar = avatar;
-    if (firstName !== undefined) updates.firstName = firstName;
-    if (lastName !== undefined) updates.lastName = lastName;
-    if (phone !== undefined) updates.phone = phone;
-    if (country !== undefined) updates.country = country;
-    if (city !== undefined) updates.city = city;
-    if (address !== undefined) updates.address = address;
-    if (postalCode !== undefined) updates.postalCode = postalCode;
-    if (gender !== undefined) updates.gender = gender;
+    const newData = { ...userData };
     
-    updates.updatedAt = new Date().toISOString();
+    if (updates.avatar !== undefined) newData.avatar = updates.avatar;
+    if (updates.firstName !== undefined) newData.firstName = updates.firstName;
+    if (updates.lastName !== undefined) newData.lastName = updates.lastName;
+    if (updates.phone !== undefined) newData.phone = updates.phone;
+    if (updates.country !== undefined) newData.country = updates.country;
+    if (updates.city !== undefined) newData.city = updates.city;
+    if (updates.address !== undefined) newData.address = updates.address;
+    if (updates.postalCode !== undefined) newData.postalCode = updates.postalCode;
+    if (updates.gender !== undefined) newData.gender = updates.gender;
+    
+    newData.updatedAt = new Date().toISOString();
     
     db.get('users')
-      .find({ id: user.id })
-      .assign(updates)
+      .find({ id: userId })
+      .assign(newData)
       .write();
-      
-    const updatedUser = db.get('users').find({ id: user.id }).value();
-    const { password: _, ...userWithoutPassword } = updatedUser;
+    
+    // Удаляем пароль из ответа
+    const { password, ...userWithoutPassword } = newData;
     
     res.json({
       success: true,
@@ -176,82 +203,31 @@ server.put('/api/profile', (req, res) => {
   }
 });
 
-// Категории
-server.get('/api/categories', (req, res) => {
-  try {
-    const db = router.db;
-    const categories = db.get('categories').value();
-    res.json(categories);
-  } catch (error) {
-    res.status(500).json({ error: 'Ошибка получения категорий' });
-  }
-});
-
-// Акции
-server.get('/api/promotions', (req, res) => {
-  try {
-    const db = router.db;
-    
-    const promotions = db.get('promotions')
-      .filter({ isActive: true })
-      .map(promotion => ({
-        id: promotion.id,
-        image: promotion.image,
-        validUntil: promotion.validUntil,
-        isActive: promotion.isActive,
-        createdAt: promotion.createdAt
-      }))
-      .value();
-    
-    res.json(promotions);
-  } catch (error) {
-    res.status(500).json({ error: 'Ошибка получения акций' });
-  }
-});
-
 const PORT = 3005;
 
 server.listen(PORT, () => {
   console.log(`👟 Sneaker Shop API запущен на http://localhost:${PORT}`);
-  console.log('📚 Документация API:');
-  console.log('🔐 Аутентификация:');
-  console.log('   POST /api/auth/register - Регистрация');
-  console.log('   POST /api/auth/login - Вход');
-  console.log('   POST /api/auth/logout - Выход');
-  console.log('   POST /api/auth/forgot-password - Восстановление пароля');
-  console.log('   GET  /api/profile - Профиль');
-  console.log('   PUT  /api/profile - Обновление профиля');
+  console.log('📚 Доступные маршруты:');
+  console.log('🔐 Аутентификация (публичные):');
+  console.log('   POST /api/auth/register');
+  console.log('   POST /api/auth/login');
+  console.log('   POST /api/auth/forgot-password');
   console.log('');
-  console.log('📁 Данные:');
-  console.log('   GET  /api/categories - Категории');
-  console.log('   GET  /api/promotions - Акции');
+  console.log('📁 Данные (публичные):');
+  console.log('   GET /api/categories');
+  console.log('   GET /api/promotions');
   console.log('');
-  console.log('👟 Продукты:');
-  console.log('   GET  /api/products - Все товары');
-  console.log('   GET  /api/products/:id - Товар по ID');
-  console.log('   GET  /api/products/category/:category - По категории');
-  console.log('');
-  console.log('🛒 Корзина:');
-  console.log('   GET  /api/cart - Корзина пользователя');
-  console.log('   POST /api/cart - Добавить в корзину');
-  console.log('   PUT  /api/cart/:id - Обновить корзину');
-  console.log('   DELETE /api/cart/:id - Удалить из корзины');
-  console.log('');
-  console.log('📦 Заказы:');
-  console.log('   GET  /api/orders - История заказов');
-  console.log('   POST /api/orders - Создать заказ');
-  console.log('   GET  /api/orders/:id - Детали заказа');
-  console.log('');
-  console.log('❤️  Избранное:');
-  console.log('   GET  /api/favorites - Избранное пользователя');
-  console.log('   POST /api/favorites/:productId - Добавить в избранное');
-  console.log('   DELETE /api/favorites/:productId - Удалить из избранного');
-  console.log('');
-  console.log('🔔 Уведомления:');
-  console.log('   GET  /api/notifications - Уведомления пользователя');
-  console.log('   PUT  /api/notifications/:id/read - Отметить как прочитанное');
+  console.log('🔒 Защищенные маршруты (требуют токен):');
+  console.log('   GET  /api/profile');
+  console.log('   PUT  /api/profile');
+  console.log('   GET  /api/products');
+  console.log('   GET  /api/cart');
+  console.log('   GET  /api/orders');
+  console.log('   GET  /api/favorites');
+  console.log('   GET  /api/notifications');
 });
 
+// Глобальный обработчик ошибок
 server.use((error, req, res, next) => {
   console.error('Global error handler:', error);
   

@@ -1,22 +1,23 @@
 const express = require('express');
+const router = express.Router();
+const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
 
-const router = express.Router();
-
 // Регистрация
-router.post('/register', (req, res) => {
-  const { email, password, firstName } = req.body;
-  
-  if (!email || !password || !firstName) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'Email, пароль и имя обязательны' 
-    });
-  }
-  
-  const db = req.app.db || require('json-server').router('db.json').db;
-  
+router.post('/register', async (req, res) => {
   try {
+    const db = req.db;
+    const { email, password, firstName } = req.body;
+    
+    // Проверяем обязательные поля
+    if (!email || !password || !firstName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Заполните все обязательные поля'
+      });
+    }
+    
+    // Проверяем, существует ли пользователь
     const existingUser = db.get('users').find({ email }).value();
     if (existingUser) {
       return res.status(400).json({
@@ -25,163 +26,170 @@ router.post('/register', (req, res) => {
       });
     }
     
+    // Хэшируем пароль
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Создаем пользователя
     const newUser = {
-      id: Date.now(),
+      id: uuidv4(),
       email,
-      password: password, // Простой пароль без хеширования
+      password: hashedPassword,
       firstName,
       lastName: '',
-      phone: '',
-      country: '',
-      city: '',
-      address: '',
-      postalCode: '',
-      avatar: '',
-      createdAt: new Date().toISOString()
+      avatar: null,
+      phone: null,
+      country: null,
+      city: null,
+      address: null,
+      postalCode: null,
+      gender: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     
     // Сохраняем пользователя
     db.get('users').push(newUser).write();
     
-    // Создаем постоянный токен для пользователя
-    const permanentToken = `user_token_${Date.now()}`;
-    
-    const newToken = {
-      id: Date.now() + 1,
+    // Создаем токен
+    const token = uuidv4();
+    const tokenData = {
+      id: uuidv4(),
       userId: newUser.id,
-      token: permanentToken,
+      token,
       createdAt: new Date().toISOString()
     };
     
-    db.get('tokens').push(newToken).write();
+    db.get('tokens').push(tokenData).write();
     
+    // Удаляем пароль из ответа
     const { password: _, ...userWithoutPassword } = newUser;
     
-    res.json({
+    res.status(201).json({
       success: true,
+      message: 'Регистрация успешна',
       user: userWithoutPassword,
-      token: permanentToken
+      token
     });
-    
   } catch (error) {
-    console.error('Registration error:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Ошибка сервера' 
+    console.error('Register error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка регистрации'
     });
   }
 });
 
-// Логин - простая проверка пароля
-router.post('/login', (req, res) => {
-  const { email, password } = req.body;
-  
-  if (!email || !password) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'Email и пароль обязательны' 
-    });
-  }
-  
-  const db = req.app.db || require('json-server').router('db.json').db;
-  
+// Вход
+router.post('/login', async (req, res) => {
   try {
+    const db = req.db;
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Введите email и пароль'
+      });
+    }
+    
+    // Ищем пользователя
     const user = db.get('users').find({ email }).value();
     
     if (!user) {
       return res.status(401).json({
         success: false,
-        error: 'Пользователь не найден'
+        error: 'Неверный email или пароль'
       });
     }
     
-    // Простая проверка пароля (без bcrypt)
-    if (user.password !== password) {
+    // Проверяем пароль
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        error: 'Неверный пароль'
+        error: 'Неверный email или пароль'
       });
     }
     
-    // Ищем существующий токен пользователя
-    const userToken = db.get('tokens').find({ userId: user.id }).value();
+    // Создаем новый токен
+    const token = uuidv4();
+    const tokenData = {
+      id: uuidv4(),
+      userId: user.id,
+      token,
+      createdAt: new Date().toISOString()
+    };
     
-    if (!userToken) {
-      return res.status(500).json({
-        success: false,
-        error: 'Токен пользователя не найден'
-      });
-    }
+    db.get('tokens').push(tokenData).write();
     
+    // Удаляем пароль из ответа
     const { password: _, ...userWithoutPassword } = user;
     
     res.json({
       success: true,
+      message: 'Вход выполнен успешно',
       user: userWithoutPassword,
-      token: userToken.token
+      token
     });
-    
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Ошибка сервера' 
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка входа'
+    });
+  }
+});
+
+// Выход
+router.post('/logout', (req, res) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader?.startsWith('Bearer ') 
+      ? authHeader.substring(7) 
+      : null;
+    
+    if (token) {
+      const db = req.db;
+      db.get('tokens').remove({ token }).write();
+    }
+    
+    res.json({
+      success: true,
+      message: 'Выход выполнен успешно'
+    });
+  } catch (error) {
+    console.error('Logout error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка выхода'
     });
   }
 });
 
 // Восстановление пароля
 router.post('/forgot-password', (req, res) => {
-  const { email } = req.body;
-  
-  if (!email) {
-    return res.status(400).json({ 
-      success: false, 
-      error: 'Email обязателен' 
-    });
-  }
-  
-  const db = req.app.db || require('json-server').router('db.json').db;
-  
-  const user = db.get('users').find({ email }).value();
-  
-  if (!user) {
-    return res.status(404).json({
-      success: false,
-      error: 'Пользователь с таким email не найден'
-    });
-  }
-  
-  res.json({
-    success: true,
-    message: 'Инструкции по восстановлению пароля отправлены на ваш email'
-  });
-});
-
-router.post('/logout', (req, res) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  
-  if (token) {
-    const db = req.app.db || require('json-server').router('db.json').db;
+  try {
+    const { email } = req.body;
     
-    // Находим токен и записываем время выхода
-    const tokenData = db.get('tokens').find({ token }).value();
-    
-    if (tokenData) {
-      db.get('tokens')
-        .find({ token })
-        .assign({ 
-          lastLogoutAt: new Date().toISOString()
-        })
-        .write();
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        error: 'Введите email'
+      });
     }
+    
+    // В реальном приложении здесь была бы отправка email
+    res.json({
+      success: true,
+      message: 'Инструкции по восстановлению пароля отправлены на email'
+    });
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка восстановления пароля'
+    });
   }
-  
-  res.json({
-    success: true,
-    message: 'Успешный выход из системы'
-  });
 });
 
 module.exports = router;
