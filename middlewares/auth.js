@@ -1,72 +1,84 @@
-const jsonServer = require('json-server');
-
 module.exports = (req, res, next) => {
-  console.log(`Auth middleware - Path: ${req.path}`);
+  console.log(`Auth middleware - Path: ${req.path}, Method: ${req.method}`);
   
   const publicRoutes = [
-    '/api/auth/login', 
-    '/api/auth/register', 
+    '/api/auth/login',
+    '/api/auth/register',
     '/api/auth/forgot-password'
   ];
   
   // Пропускаем публичные маршруты
   if (publicRoutes.includes(req.path)) {
-    console.log('Public route, skipping auth');
+    console.log('✅ Public route, skipping auth');
+    return next();
+  }
+  
+  // Пропускаем OPTIONS запросы (CORS)
+  if (req.method === 'OPTIONS') {
+    console.log('✅ OPTIONS request, skipping auth');
     return next();
   }
   
   const authHeader = req.headers['authorization'];
-  console.log('Auth header:', authHeader);
+  console.log('Auth header:', authHeader ? 'Present' : 'Missing');
   
-  const token = authHeader && authHeader.split(' ')[1];
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.log('❌ No or invalid auth header');
+    return res.status(401).json({
+      success: false,
+      error: 'Токен отсутствует или имеет неверный формат'
+    });
+  }
+  
+  const token = authHeader.split(' ')[1];
   
   if (!token) {
-    console.log('No token found');
-    return res.status(401).json({ 
-      success: false, 
-      error: 'Токен отсутствует' 
+    console.log('❌ Token is empty');
+    return res.status(401).json({
+      success: false,
+      error: 'Токен отсутствует'
     });
   }
   
   try {
-    // Получаем db из app
-    let db;
-    if (req.app && req.app.db) {
-      db = req.app.db;
-      console.log('Using db from req.app');
-    } else {
-      console.log('Creating new router for db');
-      const router = jsonServer.router('db.json');
-      db = router.db;
+    // Получаем базу данных
+    const db = req.getDatabase();
+    
+    if (!db || !db.tokens) {
+      console.log('❌ Database or tokens not available');
+      return res.status(500).json({
+        success: false,
+        error: 'Ошибка доступа к базе данных'
+      });
     }
     
-    console.log('Looking for token:', token.substring(0, 10) + '...');
+    console.log(`🔍 Looking for token in ${db.tokens.length} tokens`);
     
-    // Ищем токен в таблице tokens
-    const tokenData = db.get('tokens').find({ token }).value();
+    // Ищем токен
+    const tokenData = db.tokens.find(t => t.token === token);
     
     if (!tokenData) {
-      console.log('Token not found in database');
-      return res.status(401).json({ 
-        success: false, 
-        error: 'Неверный токен' 
+      console.log('❌ Token not found in database');
+      return res.status(401).json({
+        success: false,
+        error: 'Неверный или истекший токен'
       });
     }
     
-    console.log('Token found, userId:', tokenData.userId);
+    console.log(`✅ Token found for userId: ${tokenData.userId}`);
     
-    // Находим пользователя по userId из токена
-    const user = db.get('users').find({ id: tokenData.userId }).value();
+    // Ищем пользователя
+    const user = db.users.find(u => u.id === tokenData.userId);
     
     if (!user) {
-      console.log('User not found for token');
-      return res.status(401).json({ 
-        success: false, 
-        error: 'Пользователь не найден' 
+      console.log('❌ User not found for token');
+      return res.status(401).json({
+        success: false,
+        error: 'Пользователь не найден'
       });
     }
     
-    console.log('User found:', user.email);
+    console.log(`✅ User found: ${user.email}`);
     
     // Добавляем пользователя в запрос
     req.user = {
@@ -78,11 +90,11 @@ module.exports = (req, res, next) => {
     
     next();
   } catch (error) {
-    console.error('Auth middleware error:', error);
-    return res.status(500).json({ 
+    console.error('🔥 Auth middleware error:', error);
+    return res.status(500).json({
       success: false,
-      error: 'Ошибка проверки токена',
-      details: error.message 
+      error: 'Ошибка аутентификации',
+      details: error.message
     });
   }
 };

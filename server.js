@@ -1,5 +1,8 @@
-const jsonServer = require('json-server');
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
+
+// Загружаем существующие роуты
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const cartRoutes = require('./routes/cart');
@@ -9,157 +12,156 @@ const notificationRoutes = require('./routes/notifications');
 const authMiddleware = require('./middlewares/auth');
 const corsMiddleware = require('./middlewares/cors');
 
-const server = jsonServer.create();
-const router = jsonServer.router('db.json');
-const middlewares = jsonServer.defaults();
+const app = express();
 
-// ИСПРАВЛЕНО: Получаем db из router
-const db = router.db;
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(corsMiddleware);
 
-// Инициализируем коллекции если их нет
-if (!db.get('tokens').value()) {
-  db.set('tokens', []).write();
+// Функция для работы с db.json
+function getDatabase() {
+  try {
+    const dbPath = path.join(__dirname, 'db.json');
+    
+    // Если файла нет - создаем базовую структуру
+    if (!fs.existsSync(dbPath)) {
+      const initialData = {
+        users: [],
+        tokens: [],
+        products: [],
+        categories: [],
+        promotions: [],
+        cart: [],
+        orders: [],
+        favorites: [],
+        notifications: []
+      };
+      fs.writeFileSync(dbPath, JSON.stringify(initialData, null, 2));
+      console.log('Created new db.json file');
+    }
+    
+    const data = fs.readFileSync(dbPath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading database:', error);
+    return { users: [], tokens: [] }; // Возвращаем пустую структуру
+  }
 }
-if (!db.get('users').value()) {
-  db.set('users', []).write();
+
+function saveDatabase(data) {
+  try {
+    const dbPath = path.join(__dirname, 'db.json');
+    fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
+    return true;
+  } catch (error) {
+    console.error('Error saving database:', error);
+    return false;
+  }
 }
 
-// Middleware - ИСПРАВЛЕНО:
-server.use(express.json()); // ✅ Добавьте скобки
-server.use(express.urlencoded({ extended: true })); // ✅ Исправлено название
-server.use(jsonServer.bodyParser);
-server.use(middlewares);
-server.use(corsMiddleware);
-
-// ИСПРАВЛЕНО: Передаем db в app
-server.use((req, res, next) => {
-  req.app = req.app || {};
-  req.app.db = db; // ✅ db теперь определена
-  console.log('Setting db to request');
+// Передаем функции работы с БД в каждый запрос
+app.use((req, res, next) => {
+  req.getDatabase = getDatabase;
+  req.saveDatabase = saveDatabase;
   next();
 });
 
-// Добавим логирование для отладки
-server.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body || 'No body');
+// Логирование
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  console.log('Headers:', req.headers.authorization ? 'Token present' : 'No token');
+  console.log('Body:', req.body || 'Empty');
   next();
 });
 
 // Публичные маршруты
-server.use('/api/auth', authRoutes);
+app.use('/api/auth', authRoutes);
 
-// Применяем аутентификацию
-server.use(authMiddleware);
+// Применяем аутентификацию ко всем остальным маршрутам
+app.use(authMiddleware);
 
 // Защищенные маршруты
-server.use('/api/products', productRoutes);
-server.use('/api/cart', cartRoutes);
-server.use('/api/orders', orderRoutes);
-server.use('/api/favorites', favoriteRoutes);
-server.use('/api/notifications', notificationRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/favorites', favoriteRoutes);
+app.use('/api/notifications', notificationRoutes);
 
-// Профиль пользователя - ИСПРАВЛЕНО:
-server.get('/api/profile', (req, res) => {
+// Профиль пользователя
+app.get('/api/profile', (req, res) => {
   try {
     console.log('GET /api/profile - User:', req.user);
     
-    if (!req.user) {
-      return res.status(401).json({ 
-        success: false, 
-        error: 'Пользователь не авторизован' 
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        error: 'Пользователь не авторизован'
       });
     }
     
-    const user = req.user;
-    const db = req.app.db || router.db; // Безопасное получение db
+    const db = req.getDatabase();
+    const user = db.users.find(u => u.id === req.user.id);
     
-    console.log('Looking for user with id:', user.id);
-    
-    const userData = db.get('users').find({ id: user.id }).value();
-    
-    if (!userData) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'Пользователь не найден' 
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'Пользователь не найден'
       });
     }
     
-    console.log('Found user:', userData.email);
-    
-    // Удаляем пароль
-    const { password, ...userWithoutPassword } = userData;
+    // Удаляем пароль из ответа
+    const { password, ...userWithoutPassword } = user;
     
     res.json(userWithoutPassword);
   } catch (error) {
     console.error('Profile GET error:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: 'Ошибка сервера',
-      details: error.message 
+      details: error.message
     });
   }
 });
 
-// Обновление профиля - ИСПРАВЛЕНО:
-server.put('/api/profile', (req, res) => {
+// Обновление профиля
+app.put('/api/profile', (req, res) => {
   try {
     console.log('PUT /api/profile - User:', req.user);
     console.log('PUT /api/profile - Body:', req.body);
     
-    if (!req.user) {
-      return res.status(401).json({ 
-        success: false, 
-        error: 'Пользователь не авторизован' 
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        error: 'Пользователь не авторизован'
       });
     }
     
-    const user = req.user;
-    const {
-      avatar, 
-      firstName, 
-      lastName, 
-      phone, 
-      country, 
-      city, 
-      address, 
-      postalCode, 
-      gender 
-    } = req.body || {}; // ✅ Защита от undefined
+    const userId = req.user.id;
+    const updates = req.body || {};
     
-    const db = req.app.db || router.db;
+    const db = req.getDatabase();
+    const userIndex = db.users.findIndex(u => u.id === userId);
     
-    const userData = db.get('users').find({ id: user.id }).value();
-    
-    if (!userData) {
-      return res.status(404).json({ 
-        success: false, 
-        error: 'Пользователь не найден' 
+    if (userIndex === -1) {
+      return res.status(404).json({
+        success: false,
+        error: 'Пользователь не найден'
       });
     }
     
     // Обновляем только переданные поля
-    const updates = {};
-    if (avatar !== undefined) updates.avatar = avatar;
-    if (firstName !== undefined) updates.firstName = firstName;
-    if (lastName !== undefined) updates.lastName = lastName;
-    if (phone !== undefined) updates.phone = phone;
-    if (country !== undefined) updates.country = country;
-    if (city !== undefined) updates.city = city;
-    if (address !== undefined) updates.address = address;
-    if (postalCode !== undefined) updates.postalCode = postalCode;
-    if (gender !== undefined) updates.gender = gender;
+    db.users[userIndex] = {
+      ...db.users[userIndex],
+      ...updates,
+      updatedAt: new Date().toISOString()
+    };
     
-    updates.updatedAt = new Date().toISOString();
+    // Сохраняем изменения
+    req.saveDatabase(db);
     
-    db.get('users')
-      .find({ id: user.id })
-      .assign(updates)
-      .write();
-      
-    const updatedUser = db.get('users').find({ id: user.id }).value();
-    const { password: _, ...userWithoutPassword } = updatedUser;
+    // Удаляем пароль из ответа
+    const { password, ...userWithoutPassword } = db.users[userIndex];
     
     res.json({
       success: true,
@@ -168,44 +170,47 @@ server.put('/api/profile', (req, res) => {
     });
   } catch (error) {
     console.error('Profile PUT error:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       error: 'Ошибка обновления профиля',
-      details: error.message 
+      details: error.message
     });
   }
 });
 
 // Категории
-server.get('/api/categories', (req, res) => {
+app.get('/api/categories', (req, res) => {
   try {
-    const db = router.db;
-    const categories = db.get('categories').value();
-    res.json(categories);
+    const db = req.getDatabase();
+    res.json(db.categories || []);
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка получения категорий' });
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка получения категорий'
+    });
   }
 });
 
 // Акции
-server.get('/api/promotions', (req, res) => {
+app.get('/api/promotions', (req, res) => {
   try {
-    const db = router.db;
-    
-    const promotions = db.get('promotions')
-      .filter({ isActive: true })
-      .map(promotion => ({
-        id: promotion.id,
-        image: promotion.image,
-        validUntil: promotion.validUntil,
-        isActive: promotion.isActive,
-        createdAt: promotion.createdAt
-      }))
-      .value();
+    const db = req.getDatabase();
+    const promotions = (db.promotions || [])
+      .filter(p => p.isActive === true)
+      .map(p => ({
+        id: p.id,
+        image: p.image,
+        validUntil: p.validUntil,
+        isActive: p.isActive,
+        createdAt: p.createdAt
+      }));
     
     res.json(promotions);
   } catch (error) {
-    res.status(500).json({ error: 'Ошибка получения акций' });
+    res.status(500).json({
+      success: false,
+      error: 'Ошибка получения акций'
+    });
   }
 });
 
