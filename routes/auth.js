@@ -31,7 +31,7 @@ router.post('/register', async (req, res) => {
     
     // Создаем пользователя
     const newUser = {
-      id: uuidv4(),
+      id: Date.now(),
       email,
       password: password,
       firstName,
